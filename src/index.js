@@ -6,6 +6,7 @@ import mongoose from 'mongoose';
 
 import compressRouter from './routes/CompressRoute.js';
 import decompressRouter from './routes/DecompressRoute.js';
+import historyRouter from './routes/HistoryRoute.js';
 
 dotenv.config();
 const app = express();
@@ -36,12 +37,9 @@ app.use(bodyParser.json());
 const prefix = "/api";
 
 // SECURE API
-// app.use(prefix + '/compHist', queryRouter)
 app.use(prefix + '/compress', compressRouter)
-/* app.use(prefix + '/compressDb', queryRouter)
-app.use(prefix + '/decompHist', historyRouter) */
 app.use(prefix + '/decompress', decompressRouter)
-// app.use(prefix + '/decompressDb', historyRouter)
+app.use(prefix + '/history', historyRouter)
 
 //Connecting to DB
 read_env()
