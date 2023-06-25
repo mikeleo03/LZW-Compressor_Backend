@@ -1,32 +1,34 @@
 // LZW Compression
 function compressLZW(data) {
-    console.log(data);
     // Initialize dictionary
     let dictionary = {};
     for (let i = 0; i < 256; i++) {
         dictionary[String.fromCharCode(i)] = i;
     }
     
+    // Preprocessing
     let word = '';
     let result = [];
     let dictSize = 256;
     
+    // Iterate all over the string
     for (let i = 0, len = data.length; i < len; i++) {
         let curChar = data[i];
         let joinedWord = word + curChar;
         
-        // Do not use dictionary[joinedWord] because javascript objects 
-        // will return values for myObject['toString']
+        // Check whether exist in dictionary
         if (dictionary.hasOwnProperty(joinedWord))  {
             word = joinedWord;
         } else {
             result.push(dictionary[word]);
+            
             // Add wc to the dictionary.
             dictionary[joinedWord] = dictSize++;
             word = curChar;
         }
     }
     
+    // Handle empty chars
     if (word !== '') {
         result.push(dictionary[word]);
     }
@@ -36,21 +38,23 @@ function compressLZW(data) {
 
 // LZW Decompression
 function decompressLZW(compressedCodes) { 
-    console.log(compressedCodes); 
     // Initialize Dictionary (inverse of compress)
     let dictionary = {};
     for (let i = 0; i < 256; i++) {
         dictionary[i] = String.fromCharCode(i);
     }
     
+    // Preprocessing
     let word = String.fromCharCode(compressedCodes[0]);
     let result = word;
     let entry = '';
     let dictSize = 256;
     
+    // Iterate all over list of compressed string
     for (let i = 1, len = compressedCodes.length; i < len; i++) {
         let curNumber = compressedCodes[i];
         
+        // Check to dictionary
         if (dictionary[curNumber] !== undefined) {
             entry = dictionary[curNumber];
         } else {
@@ -74,7 +78,6 @@ function decompressLZW(compressedCodes) {
 // Main compression algorithm
 function compress(string) {
     let compressedString = compressLZW(string);
-    console.log('compressedString:', compressedString); // Add this line to check the value and type
 
     // Convert compressed codes to binary number with spaces
     let binaryString = compressedString
@@ -86,7 +89,6 @@ function compress(string) {
 
 // Main decompression algorithm
 function decompress(binaryString) {
-    console.log(binaryString);
     let compressedCodes = [];
     
     // Convert binary string to compressed codes
