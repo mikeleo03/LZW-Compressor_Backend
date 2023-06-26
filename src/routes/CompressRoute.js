@@ -9,7 +9,7 @@ router.use(express.json());
 router.get('/answer', async (req, res) => {
     try {
         // 1. Return the answer
-        let answer = compress(req.query.text);
+        let answer = compress(req.query.text, req.query.enhanced);
 
         // 2. Put into database
         var today = new Date();
@@ -20,11 +20,19 @@ router.get('/answer', async (req, res) => {
                    today.getMinutes().toString().padStart(2, '0');
     
         // Create model to be saved in the database
+        let enhanced = ''
+        if (req.query.enhanced === 'true') {
+            enhanced = '[Enhanced]'
+        } else {
+            enhanced = '[Basic]'
+        }
+
         const compressData = new Compress({
             text: req.query.text,
             time: time,
             date: date,
-            compressed: answer
+            compressed: answer,
+            enhanced: enhanced,
         });
 
         console.log(compressData);

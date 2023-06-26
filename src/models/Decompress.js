@@ -17,6 +17,10 @@ const DecompressSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    enhanced: {
+        type: String,
+        required: true,
+    },
 });
 
 const DecompressModel = mongoose.model('decompression', DecompressSchema);

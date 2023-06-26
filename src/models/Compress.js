@@ -17,6 +17,10 @@ const CompressSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    enhanced: {
+        type: String,
+        required: true,
+    },
 });
 
 const CompressModel = mongoose.model('compression', CompressSchema);
