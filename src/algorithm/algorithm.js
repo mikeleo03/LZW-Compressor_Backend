@@ -63,24 +63,24 @@ function decompressLZW(compressedCodes) {
     // Preprocessing
     let old = compressedCodes[0];
     let n;
-    let s = table.get(old);
-    let c = "";
-    c += s[0];
+    let stringval = table.get(old);
+    let curChar = "";
+    curChar += stringval[0];
     let result = '';
-    result += s;
+    result += stringval;
     let count = 256;
     for (let i = 0; i < compressedCodes.length - 1; i++) {
         n = compressedCodes[i + 1];
         if (!table.has(n)) {
-            s = table.get(old);
-            s = s + c;
+            stringval = table.get(old);
+            stringval = stringval + curChar;
         } else {
-            s = table.get(n);
+            stringval = table.get(n);
         }
-        result += s;
-        c = "";
-        c += s[0];
-        table.set(count, table.get(old) + c);
+        result += stringval;
+        curChar = "";
+        curChar += stringval[0];
+        table.set(count, table.get(old) + curChar);
         count++;
         old = n;
     }
@@ -105,6 +105,16 @@ function computeSuffixArray(arr) {
     return suff;
 }
 
+// BWT Encoding sort
+function bwtEncodingSort(a, b) {
+    if (a == bwt_end) {
+        return -1;
+    } else if (b == bwt_end) {
+        return 1;
+    }
+    return a[1] < b[1] ? -1 : 1;
+}
+
 // BWT Encoding
 function encodingBWT(array) {
     // Add EOF to the end of the array
@@ -112,16 +122,9 @@ function encodingBWT(array) {
     
     // Compute the suffix_array
     let suff = computeSuffixArray(array);
-    suff.sort(function(a, b) {
-        if (a == bwt_end) {
-            return -1;
-        } else if (b == bwt_end) {
-            return 1;
-        }
-        return a[1] < b[1] ? -1 : 1;
-    });
+    suff.sort(bwtEncodingSort);
 
-    // Process mapping
+    // Process mapping to return just the last
     suff = suff.map(function(x) {
         return x[0];
     });
