@@ -9,7 +9,7 @@ router.use(express.json());
 router.get('/answer', async (req, res) => {
     try {
         // 1. Return the answer
-        let answer = compress(req.query.text, req.query.enhanced);
+        let [answer, ratio] = compress(req.query.text, req.query.enhanced);
 
         // 2. Put into database
         var today = new Date();
@@ -33,13 +33,12 @@ router.get('/answer', async (req, res) => {
             date: date,
             compressed: answer,
             enhanced: enhanced,
+            remained: ratio.toFixed(2),
         });
-
-        console.log(compressData);
     
         // Saving to the database
         await compressData.save();
-        res.status(200).json({ data: answer });
+        res.status(200).json({ data: [answer, ratio] });
 
     } catch (error) {
         console.error("Error compressing data:", error);

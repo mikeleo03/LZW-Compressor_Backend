@@ -21,6 +21,10 @@ const CompressSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    remained: {
+        type: Number,
+        required: true,
+    },
 });
 
 const CompressModel = mongoose.model('compression', CompressSchema);

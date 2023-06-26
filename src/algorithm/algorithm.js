@@ -1,3 +1,13 @@
+// COMPRESSION LENGTH COMPARISON --------------
+function calculateTotalCompressed(arr) {
+    let totalcmp = 0;
+    for (let i = 0; i < arr.length; i++) {
+      totalcmp += String(arr[i]).length;
+    }
+
+    return totalcmp/arr.length;
+}
+
 // LZW ALGORITHM IMPLEMENTATION ------------------------
 // LZW Compression
 function compressLZW(data) {
@@ -36,7 +46,6 @@ function compressLZW(data) {
     result.push(table.get(word));
 
     // Calculate compression rate
-    console.log("res", result.length, data.length)
     let rate = (result.length / data.length) * 100
     
     return [result, rate];
@@ -77,7 +86,6 @@ function decompressLZW(compressedCodes) {
     }
     
     // Calculate decompression rate
-    console.log("result", result);
     let rate = (compressedCodes.length / result.length) * 100
     
     return [result, rate];
@@ -141,7 +149,7 @@ function decodingBWT(encoded) {
     let idx = encoded.indexOf(bwt_end);
 
     for (let i = 0; i < len; i++){
-        if (arr[encoded[i]] == undefined){
+        if (arr[encoded[i]] == undefined) {
             arr[encoded[i]] = [i];
         } else {
             arr[encoded[i]].push(i);
@@ -158,7 +166,8 @@ function decodingBWT(encoded) {
         idx = shift[idx];
     }
 
-    res.pop(); // removes EOF
+    // Remove the main block char
+    res.pop();
     return res;
 }
 
@@ -166,6 +175,14 @@ function decodingBWT(encoded) {
 // Char presedence builidng
 function buildCharList() {
     let result = '';
+
+    // Add digits
+    for (let i = 48; i <= 57; i++) {
+        result += String.fromCharCode(i);
+    }
+
+    // Add space
+    result += String.fromCharCode(32);
 
     // Add lowercase letters
     for (let i = 97; i <= 122; i++) {
@@ -177,13 +194,8 @@ function buildCharList() {
         result += String.fromCharCode(i);
     }
 
-    // Add digits
-    for (let i = 48; i <= 57; i++) {
-        result += String.fromCharCode(i);
-    }
-
-    // Add remaining characters including space
-    for (let i = 32; i <= 254; i++) {
+    // Add remaining characters
+    for (let i = 33; i <= 254; i++) {
         if (
             (i >= 97 && i <= 122) ||
             (i >= 65 && i <= 90) ||
@@ -199,10 +211,10 @@ function buildCharList() {
 
 // MTF Compression
 function compressMTF(word) {
-    console.log(word);
+    let casted = word.join(" ");
     var init = { wordAsNumbers: [], charList: buildCharList().split('') };
   
-    let result = word.split('').reduce(function(acc, char) {
+    let result = casted.split('').reduce(function(acc, char) {
         var charNum = acc.charList.indexOf(char); //get index of char
         acc.wordAsNumbers.push(charNum); //add original index to acc
         acc.charList.unshift(acc.charList.splice(charNum, 1)[0]); //put at beginning of list
@@ -210,7 +222,7 @@ function compressMTF(word) {
     }, init).wordAsNumbers; //return number list
 
     // Calculate compression rate
-    let rate = (result.length / word.length) * 100
+    let rate = (calculateTotalCompressed(result) / calculateTotalCompressed(word)) * 100
     
     return [result, rate];
 }
@@ -229,7 +241,7 @@ function decompressMTF(numList) {
     let result = stringArray.map(str => parseInt(str, 10));
 
     // Calculate decompression rate
-    let rate = (numList.length / result.length) * 100
+    let rate = (calculateTotalCompressed(numList) / calculateTotalCompressed(result)) * 100
     
     return [result, rate];
 }
@@ -244,14 +256,13 @@ function compress(string, enhanced) {
     // if enhanced, do the BWT following by MTF
     let compressedString = '';
     if (enhanced === 'true') {
-        let bwtres = encodingBWT(lzwres).join(" ")
+        let bwtres = encodingBWT(lzwres)
         let [result, rat1] = compressMTF(bwtres);
-        console.log(lzwrat, rat1);
         compressedString = result;
+        ratio = lzwrat * rat1 / 100;
     } else {
         compressedString = lzwres;
         ratio = lzwrat;
-        console.log(lzwrat);
     }
 
     // Convert compressed codes to binary number with spaces
@@ -259,7 +270,7 @@ function compress(string, enhanced) {
         .map((code) => code.toString(2).padStart(8, "0"))
         .join(" ");
   
-    return binaryString;
+    return [binaryString, ratio];
 }
 
 // Main decompression algorithm
@@ -283,16 +294,15 @@ function decompress(binaryString, enhanced) {
         let [result, rat1] = decompressMTF(compressedCodes);
         let bwtres = decodingBWT(result)
         decompressedArray = bwtres;
-        console.log(rat1);
-        ratio *= rat1;
+        ratio *= rat1 / 100;
     } else {
         decompressedArray = compressedCodes;
     }
 
     let [reslzw, ratlzw] = decompressLZW(decompressedArray);
-    console.log(ratlzw);
+    ratio *= ratlzw;
 
-    return reslzw;
+    return [reslzw, ratio];
 }
 
 export { compress, decompress };
